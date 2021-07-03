@@ -14,10 +14,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@mikro-orm/core");
 const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
+const express_1 = __importDefault(require("express"));
+const apollo_server_express_1 = require("apollo-server-express");
+const type_graphql_1 = require("type-graphql");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const orm = yield core_1.MikroORM.init(mikro_orm_config_1.default);
     yield orm.getMigrator().up();
-    console.log('---------sql 1---------');
+    const app = express_1.default();
+    const apolloServer = new apollo_server_express_1.ApolloServer({
+        schema: yield type_graphql_1.buildSchema({
+            resolvers: [],
+            validate: false,
+        }),
+    });
+    app.get('/', (_, res) => {
+        res.send('hello');
+    });
 });
 main().catch((err) => {
     console.error(err);
