@@ -49,7 +49,11 @@ export class PostResolver {
             @Arg("id") id: number,
             @Ctx() { em }: MyContext,
         ): Promise<boolean> {
-            await em.nativeDelete(Post, {id});
+            try {
+                await em.nativeDelete(Post, {id});
+            } catch {
+                return false;
+            }
             return true;
         }
 }
