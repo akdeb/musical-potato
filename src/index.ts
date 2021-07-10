@@ -9,6 +9,13 @@ import { buildSchema } from 'type-graphql';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
+import redis from 'redis';
+import session from 'express-session';
+import connectReddis from 'connect-redis';
+import { MyContext } from './types';
+
+const RedisStore = connectReddis(session);
+const redisClient = redis.createClient();
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -16,6 +23,26 @@ const main = async () => {
     
     // create an express app
     const app = express();
+
+    // connect to reddis store. to be used in apollo middleware
+    app.use(
+        session({
+            name: 'qid',
+            store: new RedisStore({ 
+                client: redisClient,
+                disableTouch: true,
+            }),
+            cookie: {
+                maxAge: 1000 * 60 * 60 *24 * 365 * 10, // 10 YEARS,
+                httpOnly: true,
+                sameSite: 'lax', // csrf
+                secure: __prod__, // cookie only works in https
+            },
+            saveUninitialized: false,
+            secret: 'bngtdhgrstvfsfhyjkugkjf',
+            resave: false,
+        })
+      )
     
     // create an apollo server to work with graphql
     const apolloServer = new ApolloServer({
@@ -23,7 +50,7 @@ const main = async () => {
             resolvers: [HelloResolver, PostResolver, UserResolver],
             validate: false,
         }),
-        context: () => ({ em: orm.em }),
+        context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
     });
 
     // create a graphQL endpoint on express
