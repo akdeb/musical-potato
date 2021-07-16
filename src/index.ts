@@ -54,7 +54,7 @@ const main = async () => {
     });
 
     // create a graphQL endpoint on express
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({ app, cors: { origin: 'http://localhost:3000' } });
 
     // listen at this port
     app.listen(4000, () => {

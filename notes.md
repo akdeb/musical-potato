@@ -30,6 +30,12 @@ redis is basically a key:vaue store and stores things like:
 5. Redis gets that key and returns the value and returns userId
 ...
 
+# Frontend info
+
+1. We are using Chakra-UI with Next.js
+2. We want to use formidable urql to manage graphql client side
+3. 
+
 ## Basically the steps this tutorial takes:
 - set up a post entity
 - set up a user entity
