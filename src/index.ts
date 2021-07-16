@@ -13,9 +13,7 @@ import redis from 'redis';
 import session from 'express-session';
 import connectReddis from 'connect-redis';
 import { MyContext } from './types';
-
-const RedisStore = connectReddis(session);
-const redisClient = redis.createClient();
+import cors from 'cors';
 
 const main = async () => {
     const orm = await MikroORM.init(mikroConfig);
@@ -23,6 +21,14 @@ const main = async () => {
     
     // create an express app
     const app = express();
+
+    const RedisStore = connectReddis(session);
+    const redisClient = redis.createClient();
+
+    app.use(cors({
+        origin: 'http://localhost:3000',
+        credentials: true,
+    }));
 
     // connect to reddis store. to be used in apollo middleware
     app.use(
@@ -54,7 +60,7 @@ const main = async () => {
     });
 
     // create a graphQL endpoint on express
-    apolloServer.applyMiddleware({ app, cors: { origin: 'http://localhost:3000' } });
+    apolloServer.applyMiddleware({ app, cors: false });
 
     // listen at this port
     app.listen(4000, () => {
